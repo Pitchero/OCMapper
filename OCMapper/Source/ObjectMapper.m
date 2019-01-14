@@ -159,12 +159,6 @@
 			if (excludedKeys && [excludedKeys containsObject:originalPropertyName]) {
 				continue;
 			}
-            
-            // On iOS 10 or 11 try to avoid issues with nil properties as property_getName() seems to return nil
-            NSOperatingSystemVersion osVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
-            if (originalPropertyName == nil && (osVersion.majorVersion == 10 || osVersion.majorVersion == 11)) {
-                continue;
-            }
 			
 			Class class = NSClassFromString([self typeForProperty:originalPropertyName andClass:[object class]]);
 			id propertyValue = [object valueForKey:(NSString *)originalPropertyName];
@@ -176,11 +170,12 @@
 				propertyValue = mapingInfo.transformer(propertyValue, object);
 				[props setObject:propertyValue forKey:propertyName];
 			}
-			// If class is in the main bundle it's an application specific class
-			else if ([NSBundle mainBundle] == [NSBundle bundleForClass:[propertyValue class]])
-			{
-				if (propertyValue) [props setObject:[self dictionaryFromObject:propertyValue] forKey:propertyName];
-			}
+            
+            // If class is in the main bundle it's an application specific class
+            else if (propertyValue != nil && ([NSBundle mainBundle] == [NSBundle bundleForClass:[propertyValue class]]))
+            {
+                if (propertyValue) [props setObject:[self dictionaryFromObject:propertyValue] forKey:propertyName];
+            }
 			// It's not in the main bundle so it's a Cocoa Class
 			else
 			{
