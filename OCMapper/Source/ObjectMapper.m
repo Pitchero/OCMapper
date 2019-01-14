@@ -159,6 +159,12 @@
 			if (excludedKeys && [excludedKeys containsObject:originalPropertyName]) {
 				continue;
 			}
+            
+            // On iOS 10 or 11 try to avoid issues with nil properties as property_getName() seems to return nil
+            NSOperatingSystemVersion osVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
+            if (originalPropertyName == nil && (osVersion.majorVersion == 10 || osVersion.majorVersion == 11)) {
+                continue;
+            }
 			
 			Class class = NSClassFromString([self typeForProperty:originalPropertyName andClass:[object class]]);
 			id propertyValue = [object valueForKey:(NSString *)originalPropertyName];
